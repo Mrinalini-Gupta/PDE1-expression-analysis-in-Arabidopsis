@@ -71,6 +71,7 @@ AT2G23820
 
 Repository structure
 
+```text
 PDE1-expression-analysis-in-Arabidopsis/
 ├── README.md
 ├── .gitignore
@@ -80,17 +81,17 @@ PDE1-expression-analysis-in-Arabidopsis/
 │   └── README.md
 └── results/
     ├── figures/
-    │   ├── Fig1_PDE1_expression_with_DESeq2_significance.png
+    │   ├── Fig1_PDE1_expression_with_statistics.png
     │   ├── Fig2_candidate_expression_overview.png
     │   ├── Fig3_DESeq2_log2FC_vs_mock.png
     │   ├── Fig4_DESeq2_log2FC_heatmap.png
     │   └── Fig5_ranked_max_DESeq2_effect.png
     ├── tables/
-    │   ├── bulk_DESeq2_all_candidate_contrasts.csv
-    │   └── bulk_DESeq2_candidate_peak_summary.csv
+    │   ├── bulk_DESeq2_candidate_results.csv
+    │   └── bulk_candidate_peak_summary.csv
     ├── analysis_parameters.txt
     └── sessionInfo.txt
-
+```
 Raw data
 
 Raw data are not committed to this repository.
@@ -200,25 +201,6 @@ Contains all candidate-gene treatment-vs-matched-time-mock results, including lo
 bulk_DESeq2_candidate_peak_summary.csv
 
 Contains the maximum estimated positive DESeq2 response for each candidate together with the stimulus, time, fold change, confidence interval and statistical support for that selected contrast.
-
-Important interpretation notes
-
-A large observed effect is not automatically statistically significant. Statements such as “largest” or “highest” should be described as descriptive rankings unless accompanied by the DESeq2 result for the relevant contrast.
-
-Likewise, the earlier manually calculated quantity
-
-log2((treatment + 1)/(mock + 1))
-
-is a descriptive induction ratio calculated from normalised counts. It is not the same as the DESeq2 model-based log2 fold change. The current workflow therefore uses DESeq2 log2FC and adjusted P values for formal statistical claims.
-
-Reproducibility
-
-Do not edit generated result tables manually. Re-run the script whenever the analysis changes.
-
-The following files record computational provenance:
-
-results/sessionInfo.txt
-results/analysis_parameters.txt
 
 Citation
 
