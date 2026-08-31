@@ -14,7 +14,7 @@
 #   BH-adjusted P < 0.05
 #
 # Outputs:
-#   5 figures
+#   4 figures
 #   2 main result tables
 #   sessionInfo + analysis parameters
 # =============================================================================
@@ -382,26 +382,9 @@ write.csv(
   row.names = FALSE
 )
 
-# =============================================================================
-# 8. Peak summary
-# =============================================================================
-
-peak_summary <- candidate_results |>
-  dplyr::filter(!is.na(log2FC)) |>
-  dplyr::group_by(gene_id, gene_label, gene_group) |>
-  dplyr::arrange(dplyr::desc(log2FC), .by_group = TRUE) |>
-  dplyr::slice(1) |>
-  dplyr::ungroup() |>
-  dplyr::arrange(dplyr::desc(log2FC))
-
-write.csv(
-  peak_summary,
-  "results/tables/bulk_candidate_peak_summary.csv",
-  row.names = FALSE
-)
 
 # =============================================================================
-# 9. Normalised-expression table
+# 8. Normalised-expression table
 # =============================================================================
 
 expression_list <- vector("list", nrow(candidate_found))
@@ -441,7 +424,7 @@ expression_summary <- expression_long |>
   )
 
 # =============================================================================
-# 10. Plot theme
+# 9. Plot theme
 # =============================================================================
 
 theme_final <- function(base_size = 12) {
@@ -460,7 +443,7 @@ theme_final <- function(base_size = 12) {
 }
 
 # =============================================================================
-# 11. Figure 1: PDE1 normalised expression + FDR labels
+# 10. Figure 1: PDE1 normalised expression + FDR labels
 # =============================================================================
 
 pde1_expr <- expression_long |>
@@ -575,7 +558,7 @@ ggsave(
 )
 
 # =============================================================================
-# 12. Figure 2: candidate normalised-expression overview
+# 11. Figure 2: candidate normalised-expression overview
 # =============================================================================
 
 fig2 <- ggplot(
@@ -620,7 +603,7 @@ ggsave(
 )
 
 # =============================================================================
-# 13. Figure 3: formal DESeq2 log2FC vs matched-time mock
+# 12. Figure 3: formal DESeq2 log2FC vs matched-time mock
 # =============================================================================
 
 fig3_data <- candidate_results |>
@@ -679,21 +662,82 @@ ggsave(
 )
 
 # =============================================================================
-# 14. Figure 4: DESeq2 log2FC heatmap
+# 13. Figure 4: DESeq2 log2FC heatmap
 # =============================================================================
+# ==========================================================
+# DESeq2 contrasts: each time point vs 0 min within stimulus
+# Used for Fig. 4 heatmap
+# ==========================================================
 
-heatmap_data <- candidate_results |>
+baseline_times <- c("5", "10", "30", "90", "180")
+
+baseline_grid <- tidyr::expand_grid(
+  stimulus = stimulus_order,
+  time = baseline_times
+)
+
+extract_baseline_contrast <- function(stimulus, time) {
+  
+  test_group <- paste0(stimulus, "_", time)
+  ref_group  <- paste0(stimulus, "_0")
+  
+  res <- DESeq2::results(
+    dds_col,
+    contrast = c("group", test_group, ref_group),
+    alpha = 0.05
+  )
+  
+  candidate_found |>
+    dplyr::transmute(
+      gene_id,
+      gene_label,
+      stimulus = stimulus,
+      time = time,
+      log2FC = res[gene_id, "log2FoldChange"],
+      lfcSE = res[gene_id, "lfcSE"],
+      pvalue = res[gene_id, "pvalue"],
+      padj = res[gene_id, "padj"]
+    )
+}
+
+baseline_results <- purrr::pmap_dfr(
+  baseline_grid,
+  extract_baseline_contrast
+)
+baseline_zero <- candidate_found |>
+  tidyr::crossing(stimulus = stimulus_order) |>
+  dplyr::transmute(
+    gene_id,
+    gene_label,
+    stimulus,
+    time = "0",
+    log2FC = 0,
+    lfcSE = NA_real_,
+    pvalue = NA_real_,
+    padj = NA_real_
+  )
+
+baseline_results <- dplyr::bind_rows(
+  baseline_zero,
+  baseline_results
+)
+baseline_results <- baseline_results |>
   dplyr::mutate(
-    time_factor = factor(time, levels = time_order),
-    
-    # Set required top-to-bottom gene order
+    significant_FDR05 = !is.na(padj) & padj < 0.05,
+    sig_label = ifelse(significant_FDR05, "*", "")
+  )
+heatmap_data <- baseline_results |>
+  dplyr::filter(time != "0") |>
+  dplyr::mutate(
+    stimulus = factor(stimulus, levels = stimulus_order),
+    time_factor = factor(
+      time,
+      levels = c("5", "10", "30", "90", "180")
+    ),
     gene_label = factor(
       as.character(gene_label),
       levels = rev(gene_order)
-    ),
-    
-    # Mark statistically significant results
-    sig_label = ifelse(significant_FDR05, "*", "")
+    )
   )
 heatmap_limit <- max(abs(heatmap_data$log2FC), na.rm = TRUE)
 
@@ -708,18 +752,26 @@ fig4 <- ggplot(
   geom_tile(colour = "grey80", linewidth = 0.3) +
   geom_text(aes(label = sig_label), fontface = "bold", size = 3.6) +
   facet_wrap(~ stimulus, nrow = 1) +
-  scale_fill_gradient2(
-    low = "#8c2d2d",
-    mid = "grey90",
-    high = "#5e4fa2",
-    midpoint = 0,
-    limits = c(-heatmap_limit, heatmap_limit),
+  scale_fill_gradientn(
+    colours = c(
+      "#440154",  # dark purple - negative
+      "#414487",  # blue-purple
+      "#2A788E",  # teal-blue
+      "#22A884",  # green-teal
+      "#7AD151",  # light green
+      "#FDE725"   # yellow - high positive
+    ),
+    values = scales::rescale(
+      c(-2, -1, 0, 1, 2, 4)
+    ),
+    limits = c(-2, 4),
+    oob = scales::squish,
     name = "DESeq2\nlog2FC"
   ) +
   theme_final(10) +
   labs(
     title = "DESeq2 log2 fold-change heatmap of PDE candidate genes and PR1",
-    subtitle = "* BH-adjusted P < 0.05; treatment vs matched-time mock",
+    subtitle = "Compared with 0-min baseline within each stimulus; * BH-adjusted P < 0.05",
     x = "Time after treatment (min)",
     y = "Gene"
   ) +
@@ -734,87 +786,7 @@ ggsave(
 )
 
 # =============================================================================
-# 15. Figure 5: ranked maximum estimated DESeq2 response
-# =============================================================================
-
-fig5_data <- peak_summary |>
-  dplyr::mutate(
-    gene_label = factor(
-      as.character(gene_label),
-      levels = rev(as.character(gene_label))
-    ),
-    statistical_support = dplyr::case_when(
-      is.na(padj) ~ "FDR unavailable",
-      padj < ALPHA ~ "FDR < 0.05",
-      TRUE ~ "FDR ≥ 0.05"
-    ),
-    peak_label = paste0(
-      as.character(stimulus),
-      ", ",
-      time,
-      " min\nFC=",
-      sprintf("%.2f", fold_change),
-      "; FDR=",
-      ifelse(
-        is.na(padj),
-        "NA",
-        formatC(padj, format = "g", digits = 2)
-      )
-    )
-  )
-
-fig5 <- ggplot(
-  fig5_data,
-  aes(
-    x = gene_label,
-    y = log2FC,
-    fill = statistical_support
-  )
-) +
-  geom_col(width = 0.72, colour = "black", linewidth = 0.25) +
-  geom_errorbar(
-    aes(
-      ymin = ci95_low_log2FC,
-      ymax = ci95_high_log2FC
-    ),
-    width = 0.22,
-    linewidth = 0.35,
-    na.rm = TRUE
-  ) +
-  geom_text(
-    aes(label = peak_label),
-    hjust = -0.03,
-    size = 3
-  ) +
-  scale_fill_manual(
-    values = c(
-      "FDR < 0.05" = "#00bfc4",       # blue = significant
-      "FDR ≥ 0.05" = "#f8766d"       # orange = not significant
-    )
-  ) +
-  coord_flip() +
-  theme_final(11) +
-  labs(
-    title = "Maximum estimated DESeq2 response of candidate genes",
-    subtitle = "Descriptive ranking; each selected contrast retains its DESeq2 FDR",
-    x = "Gene",
-    y = "Maximum DESeq2 log2FC vs matched-time mock",
-    fill = "Statistical support"
-  ) +
-  expand_limits(
-    y = max(fig5_data$ci95_high_log2FC, na.rm = TRUE) + 1.6
-  )
-
-ggsave(
-  "results/figures/Fig5_ranked_max_DESeq2_effect.png",
-  fig5,
-  width = 12,
-  height = 8,
-  dpi = 600
-)
-
-# =============================================================================
-# 16. Print key PDE1 and PR1 results
+# 14. Print key PDE1 and PR1 results
 # =============================================================================
 
 cat("\nPDE1 results:\n")
