@@ -345,19 +345,35 @@ make_whole_umap_15panel(
   gene_label = "PR1",
   out_file = file.path(out_15panel, "Fig7_PR1_detected_cells_15panel.png")
 )
-
 # ============================================================
-# 8. Figure 3: Candidate gene dotplot across major clusters
+# 8. Fig. 8: Candidate gene dotplot across major clusters
+# with exploratory Fisher exact test significance
 # ============================================================
 
 candidate_genes <- data.frame(
   gene_id = c(
-    "AT1G17330", "AT5G40270", "AT5G40290", "MIOX1", "MIOX2",
-    "RSH1", "MIOX5", "AT1G26160", "AT2G23820", "PR1"
+    "AT1G17330",  # PDE1
+    "PR1",        # PR1
+    "MIOX1",      # AT1G14520
+    "MIOX2",      # AT2G19800
+    "MIOX5",      # AT5G56640
+    "AT5G40270",  # 270
+    "AT5G40290",  # 290
+    "RSH1",       # AT4G02260
+    "AT1G26160",  # 160
+    "AT2G23820"   # 820
   ),
   gene_label = c(
-    "PDE1", "AT5G40270", "AT5G40290", "MIOX1", "MIOX2",
-    "RSH1", "MIOX5", "AT1G26160", "AT2G23820", "PR1"
+    "PDE1",
+    "PR1",
+    "MIOX1",
+    "MIOX2",
+    "MIOX5",
+    "AT5G40270",
+    "AT5G40290",
+    "RSH1",
+    "AT1G26160",
+    "AT2G23820"
   ),
   stringsAsFactors = FALSE
 )
@@ -367,6 +383,9 @@ candidate_genes <- candidate_genes %>%
 
 Idents(obj) <- "SCT_snn_res.1"
 
+# -----------------------------
+# DotPlot data
+# -----------------------------
 dot_data <- DotPlot(
   obj,
   features = candidate_genes$gene_id,
@@ -381,7 +400,77 @@ dot_data <- dot_data %>%
     gene_label = factor(gene_label, levels = candidate_genes$gene_label)
   )
 
-# dominant cell type for each major cluster
+# -----------------------------
+# Fisher exact test:
+# gene detected in cluster vs outside cluster
+# -----------------------------
+expr_mat <- GetAssayData(obj, assay = "SCT", layer = "data")
+
+stats_list <- list()
+
+for (i in seq_len(nrow(candidate_genes))) {
+  
+  gene_id <- candidate_genes$gene_id[i]
+  gene_label <- candidate_genes$gene_label[i]
+  
+  detected <- as.numeric(expr_mat[gene_id, colnames(obj)] > 0)
+  names(detected) <- colnames(obj)
+  
+  for (cl in sort(unique(as.character(obj$SCT_snn_res.1)))) {
+    
+    in_cluster <- as.character(obj$SCT_snn_res.1) == cl
+    
+    detected_in <- sum(detected[in_cluster] == 1, na.rm = TRUE)
+    not_detected_in <- sum(detected[in_cluster] == 0, na.rm = TRUE)
+    
+    detected_out <- sum(detected[!in_cluster] == 1, na.rm = TRUE)
+    not_detected_out <- sum(detected[!in_cluster] == 0, na.rm = TRUE)
+    
+    fisher_table <- matrix(
+      c(
+        detected_in,
+        not_detected_in,
+        detected_out,
+        not_detected_out
+      ),
+      nrow = 2,
+      byrow = TRUE
+    )
+    
+    fisher_res <- fisher.test(fisher_table)
+    
+    stats_list[[paste(gene_label, cl, sep = "_")]] <- data.frame(
+      gene_label = gene_label,
+      id = cl,
+      p_value = fisher_res$p.value,
+      stringsAsFactors = FALSE
+    )
+  }
+}
+
+stats_df <- bind_rows(stats_list) %>%
+  mutate(
+    p_adj = p.adjust(p_value, method = "BH"),
+    significance = case_when(
+      p_adj < 0.001 ~ "***",
+      p_adj < 0.01  ~ "**",
+      p_adj < 0.05  ~ "*",
+      TRUE ~ ""
+    ),
+    id_num = as.numeric(id),
+    gene_label = factor(gene_label, levels = candidate_genes$gene_label)
+  )
+
+# Add significance to dotplot data
+dot_data <- dot_data %>%
+  left_join(
+    stats_df %>% select(gene_label, id_num, p_adj, significance),
+    by = c("gene_label", "id_num")
+  )
+
+# -----------------------------
+# Dominant cell type for each major cluster
+# -----------------------------
 dominant_celltype <- obj@meta.data %>%
   as.data.frame() %>%
   count(SCT_snn_res.1, celltype, name = "n") %>%
@@ -398,6 +487,9 @@ cluster_levels <- sort(unique(dot_data$id_num))
 dot_data$id_factor <- factor(dot_data$id_num, levels = cluster_levels)
 dominant_celltype$id_factor <- factor(dominant_celltype$id_num, levels = cluster_levels)
 
+# -----------------------------
+# Left cell-type strip
+# -----------------------------
 p_strip <- ggplot(dominant_celltype, aes(x = 1, y = id_factor, fill = celltype)) +
   geom_tile(width = 0.7, height = 0.9) +
   scale_fill_manual(values = celltype_cols, name = "Dominant\ncell type") +
@@ -412,30 +504,46 @@ p_strip <- ggplot(dominant_celltype, aes(x = 1, y = id_factor, fill = celltype))
     legend.position = "none"
   )
 
+# -----------------------------
+# Dotplot with FDR significance stars
+# -----------------------------
 p_dot <- ggplot(dot_data, aes(x = gene_label, y = id_factor)) +
   geom_point(aes(size = pct.exp, colour = avg.exp.scaled), alpha = 0.9) +
-  scale_colour_gradient(low = "grey85", high = "blue", name = "Average\nexpression") +
-  scale_size(range = c(0.2, 8), name = "% expressing") +
+  geom_text(
+    aes(label = significance),
+    size = 3.2,
+    colour = "black",
+    vjust = 0.35
+  ) +
+  scale_colour_gradient(
+    low = "grey85",
+    high = "blue",
+    name = "Average\nexpression"
+  ) +
+  scale_size(
+    range = c(0.2, 8),
+    name = "% expressing"
+  ) +
   labs(
-    title = "Candidate gene expression across major clusters",
-    subtitle = "Y-axis = SCT_snn_res.1 major clusters; left colour strip = dominant cell type",
+    title = "Candidate gene expression and cluster enrichment",
+    subtitle = "Dot size = % expressing; colour = average expression; stars = Fisher exact test FDR significance",
     x = "Candidate genes",
     y = NULL
   ) +
   theme_classic(base_size = 14) +
   theme(
     plot.title = element_text(hjust = 0.5, face = "bold", size = 18),
-    plot.subtitle = element_text(hjust = 0.5, size = 12),
+    plot.subtitle = element_text(hjust = 0.5, size = 11),
     axis.text.x = element_text(angle = 45, hjust = 1, face = "bold"),
     axis.text.y = element_blank(),
     axis.ticks.y = element_blank()
   )
 
-p_fig3 <- p_strip + p_dot + plot_layout(widths = c(0.7, 9))
+p_fig8 <- p_strip + p_dot + plot_layout(widths = c(0.7, 9))
 
 ggsave(
   filename = file.path(out_dotplot, "Fig8_candidate_gene_dotplot_major_clusters_celltype_yaxis.png"),
-  plot = p_fig3,
+  plot = p_fig8,
   width = 16,
   height = 11,
   dpi = 300,
