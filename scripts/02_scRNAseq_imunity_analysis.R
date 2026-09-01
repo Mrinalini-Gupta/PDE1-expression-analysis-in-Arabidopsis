@@ -246,7 +246,7 @@ p_fig2 <- ggplot(fig2_df, aes(x = UMAP_1, y = UMAP_2, colour = celltype)) +
   )
 
 ggsave(
-  filename = file.path(out_fig2, "fig5_celltypes_umap.png"),
+  filename = file.path(out_fig2, "Fig5_celltypes_umap.png"),
   plot = p_fig2,
   width = 7,
   height = 6,
@@ -336,14 +336,14 @@ make_whole_umap_15panel(
   seu = obj,
   gene_id = "AT1G17330",
   gene_label = "PDE1",
-  out_file = file.path(out_15panel, "fig6_PDE1_detected_cells_15panel.png")
+  out_file = file.path(out_15panel, "Fig6_PDE1_detected_cells_15panel.png")
 )
 
 make_whole_umap_15panel(
   seu = obj,
   gene_id = "PR1",
   gene_label = "PR1",
-  out_file = file.path(out_15panel, "fig7_PR1_detected_cells_15panel.png")
+  out_file = file.path(out_15panel, "Fig7_PR1_detected_cells_15panel.png")
 )
 
 # ============================================================
@@ -434,7 +434,7 @@ p_dot <- ggplot(dot_data, aes(x = gene_label, y = id_factor)) +
 p_fig3 <- p_strip + p_dot + plot_layout(widths = c(0.7, 9))
 
 ggsave(
-  filename = file.path(out_dotplot, "fig8_candidate_gene_dotplot_major_clusters_celltype_yaxis.png"),
+  filename = file.path(out_dotplot, "Fig8_candidate_gene_dotplot_major_clusters_celltype_yaxis.png"),
   plot = p_fig3,
   width = 16,
   height = 11,
@@ -711,14 +711,14 @@ make_marker_dotplot(
   seu_obj = epi_obj,
   celltype_name = "Epidermis",
   marker_list = epidermis_marker_list,
-  out_file = file.path(out_marker, "fig10_Epidermis_marker_dotplot.png")
+  out_file = file.path(out_marker, "Fig10_Epidermis_marker_dotplot.png")
 )
 
 make_marker_dotplot(
   seu_obj = meso_obj,
   celltype_name = "Mesophyll",
   marker_list = mesophyll_marker_list,
-  out_file = file.path(out_marker, "fig13_Mesophyll_marker_dotplot.png")
+  out_file = file.path(out_marker, "Fig13_Mesophyll_marker_dotplot.png")
 )
 
 # ============================================================
@@ -878,7 +878,7 @@ make_subcluster_binary_panel(
   celltype_name = "Epidermis",
   gene_id = "AT1G17330",
   gene_label = "PDE1_AT1G17330",
-  out_file = file.path(out_subcluster, "fig11_PDE1_AT1G17330_Epidermis_binary_subcluster_panels.png")
+  out_file = file.path(out_subcluster, "Fig11_PDE1_AT1G17330_Epidermis_binary_subcluster_panels.png")
 )
 
 make_subcluster_binary_panel(
@@ -886,7 +886,7 @@ make_subcluster_binary_panel(
   celltype_name = "Mesophyll",
   gene_id = "AT1G17330",
   gene_label = "PDE1_AT1G17330",
-  out_file = file.path(out_subcluster, "fig14_PDE1_AT1G17330_Mesophyll_binary_subcluster_panels.png")
+  out_file = file.path(out_subcluster, "Fig14_PDE1_AT1G17330_Mesophyll_binary_subcluster_panels.png")
 )
 
 make_subcluster_binary_panel(
@@ -894,7 +894,7 @@ make_subcluster_binary_panel(
   celltype_name = "Epidermis",
   gene_id = "PR1",
   gene_label = "PR1_AT2G14610",
-  out_file = file.path(out_subcluster, "fig12_PR1_AT2G14610_Epidermis_binary_subcluster_panels.png")
+  out_file = file.path(out_subcluster, "Fig12_PR1_AT2G14610_Epidermis_binary_subcluster_panels.png")
 )
 
 make_subcluster_binary_panel(
@@ -902,7 +902,7 @@ make_subcluster_binary_panel(
   celltype_name = "Mesophyll",
   gene_id = "PR1",
   gene_label = "PR1_AT2G14610",
-  out_file = file.path(out_subcluster, "fig15_PR1_AT2G14610_Mesophyll_binary_subcluster_panels.png")
+  out_file = file.path(out_subcluster, "Fig15_PR1_AT2G14610_Mesophyll_binary_subcluster_panels.png")
 )
 
 # ============================================================
