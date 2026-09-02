@@ -1,0 +1,58 @@
+# -----------------------------
+# R / RStudio
+# -----------------------------
+.Rhistory
+.RData
+.Ruserdata
+.Rproj.user/
+*.Rproj
+
+# -----------------------------
+# Large R objects
+# -----------------------------
+*.rds
+*.rds.gz
+*.RData
+*.rda
+
+# -----------------------------
+# Large sequencing / matrix files
+# -----------------------------
+*.h5
+*.h5ad
+*.mtx
+*.mtx.gz
+*.loom
+
+# -----------------------------
+# Raw downloaded data
+# -----------------------------
+data/raw/*.rds
+data/raw/*.rds.gz
+data/raw/*.h5
+data/raw/*.h5ad
+data/raw/*.mtx
+data/raw/*.mtx.gz
+data/raw/*.csv.gz
+data/raw/*.tsv.gz
+
+# -----------------------------
+# Temporary / system files
+# -----------------------------
+.DS_Store
+Thumbs.db
+*.tmp
+*.temp
+~$*
+
+# -----------------------------
+# R cache / package environments
+# -----------------------------
+.Rcache/
+renv/library/
+renv/staging/
+
+# -----------------------------
+# Logs
+# -----------------------------
+*.log
