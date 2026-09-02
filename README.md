@@ -1,209 +1,218 @@
-PDE1 expression analysis in Arabidopsis thaliana
+Repository usage guide
 
-Reproducible transcriptomic reanalysis of PDE1 (AT1G17330) across immune-associated and developmental contexts in Arabidopsis thaliana.
+This README describes only how to set up, navigate and run this repository.
 
-This repository accompanies an MSc Bioinformatics project investigating when and where PDE1 is detected using publicly available bulk RNA-seq, single-cell/single-nucleus RNA-seq and spatial transcriptomic datasets.
+Folder structure
 
-This README currently documents the bulk RNA-seq immune-elicitor analysis. Single-cell and spatial scripts can be added as separate reproducible workflows.
-
-Bulk RNA-seq dataset
-
-The bulk analysis reuses the RNA-seq dataset from:
-
-Bjornson M, Pimprikar P, Nürnberger T, Zipfel C. The transcriptional landscape of Arabidopsis thaliana pattern-triggered immunity. Nature Plants. 2021;7:579–586. DOI: 10.1038/s41477-021-00874-5.
-
-Data accession: ArrayExpress E-MTAB-9694.
-
-The analysis focuses on wild-type Col samples exposed to immune elicitors including flg22, elf18, nlp20, oligogalacturonides (OGs), Pep1, chitooctaose and 3-OH-FA.
-
-Statistical approach
-
-The analysis starts from raw integer RNA-seq counts and fits a new DESeq2 model specifically for the wild-type Col samples.
-
-For formal inference, stimulus and time are combined into a single group:
-
-group = stimulus × time
-DESeq2 design = ~ group
-
-Each immune-elicitor/time combination is compared with the matched-time mock group.
-
-For example:
-
-flg22_90 min vs mock_90 min
-
-For every contrast, DESeq2 reports:
-
-log2 fold change;
-
-standard error;
-
-Wald test P value;
-
-Benjamini-Hochberg adjusted P value (FDR);
-
-estimated fold change;
-
-95% Wald confidence interval.
-
-An adjusted P value below 0.05 is treated as statistical evidence for differential expression.
-
-The expression trajectory figures use DESeq2-normalised counts for visualisation, while the treatment-effect figures use the formal DESeq2 model estimates.
-
-Candidate genes
-
-PDE1 is compared with PR1 (AT2G14610) as a canonical defence-responsive comparator and with eight additional candidate genes examined for HD-domain/PDEase-like relationships:
-
-AT5G40270
-
-AT5G40290
-
-AT1G14520
-
-AT2G19800
-
-AT4G02260
-
-AT5G56640
-
-AT1G26160
-
-AT2G23820
-
-Repository structure
-
-```text
 PDE1-expression-analysis-in-Arabidopsis/
-├── README.md
-├── .gitignore
-├── scripts/
-│   └── 01_bulk_RNAseq_DESeq2_analysis.R
 ├── data/
-│   └── README.md
-└── results/
-    ├── figures/
-    │   ├── Fig1_PDE1_expression_with_statistics.png
-    │   ├── Fig2_candidate_expression_overview.png
-    │   ├── Fig3_DESeq2_log2FC_vs_mock.png
-    │   ├── Fig4_DESeq2_log2FC_heatmap.png
-    │   └── Fig5_ranked_max_DESeq2_effect.png
-    ├── tables/
-    │   ├── bulk_DESeq2_candidate_results.csv
-    │   └── bulk_candidate_peak_summary.csv
-    ├── analysis_parameters.txt
-    └── sessionInfo.txt
-```
-Raw data
+│   ├── raw/          # downloaded input files
+│   └── processed/    # intermediate files created by scripts
+├── scripts/          # R scripts
+├── results/
+│   ├── figures/      # generated figures
+│   └── tables/       # generated tables
+├── README.md
+└── .gitignore
 
-Raw data are not committed to this repository.
+Large source datasets should remain local and do not need to be uploaded to GitHub.
 
-For the bulk workflow, place or retain the following files in a local data directory:
-
-PRJEB25079_UncorrectedCounts.csv
-E-MTAB-9694.sdrf.txt
-
-The analysis script accepts the raw-data directory as a command-line argument, so the repository does not depend on a user-specific absolute path.
-
-Example local location used during development:
-
-C:/Users/qo25519/Documents/PDE1_bulkRNA_analysis/PDE_candidate_bulkRNA/data
-
-Software
-
-The workflow was developed using:
-
-R 4.5.1
-
-RStudio 2026.06.0+242
-
-DESeq2
-
-tidyverse
-
-ggplot2
-
-patchwork
-
-The exact package versions used in a completed run are written automatically to:
-
-results/sessionInfo.txt
-
-Running the bulk analysis
-
-1. Clone the repository
+Clone and configure
 
 git clone https://github.com/Mrinalini-Gupta/PDE1-expression-analysis-in-Arabidopsis.git
 cd PDE1-expression-analysis-in-Arabidopsis
 
-2. Create the project folders if needed
+Several scripts contain BASE_DIR or base_dir. Change this to the repository location on the new computer:
 
-mkdir -p scripts data results/figures results/tables
+BASE_DIR <- "C:/Users/USERNAME/Documents/PDE1-expression-analysis-in-Arabidopsis"
 
-On Windows PowerShell, the folders can also be created manually.
+Use forward slashes in R paths.
 
-3. Save the R script
+R packages
 
-Place:
+Install packages requested by the scripts if they are not already installed. Packages used across the repository include DESeq2, Seurat, SeuratObject, Matrix, tidyverse, ggplot2, dplyr, tidyr, tibble, purrr, readr, stringr, forcats, patchwork, scales, readxl, curl and gridExtra.
 
-01_bulk_RNAseq_DESeq2_analysis.R
+Example:
 
-inside:
+install.packages(c("Seurat","tidyverse","patchwork","readxl","curl","gridExtra"))
 
-scripts/
+if (!requireNamespace("BiocManager", quietly=TRUE))
+  install.packages("BiocManager")
+BiocManager::install("DESeq2")
 
-4. Run from the repository root
+Script 01
 
-Using the local raw-data directory:
+scripts/01_bulk_RNAseq_DESeq2_analysis.R
 
-Rscript scripts/01_bulk_RNAseq_DESeq2_analysis.R "C:/Users/qo25519/Documents/PDE1_bulkRNA_analysis/PDE_candidate_bulkRNA/data"
+Place in data/raw/:
 
-The script will:
+PRJEB25079_UncorrectedCounts.csv
+E-MTAB-9694.sdrf.txt
 
-locate the raw count file;
+Run:
 
-identify the Arabidopsis gene-ID column;
+source("scripts/01_bulk_RNAseq_DESeq2_analysis.R")
 
-parse genotype, stimulus, time and replicate information from sample names;
+Outputs are written to data/processed/, results/figures/, results/tables/ and results/.
 
-retain wild-type Col samples for formal inference;
+Script 02
 
-perform minimal low-count filtering;
+scripts/02_final_generate_scRNA_figures.R
 
-fit a DESeq2 stimulus-time group model;
+Place in data/raw/:
 
-test every available elicitor/time combination against matched-time mock;
+GSE226826_combined_filtered.rds
 
-apply Benjamini-Hochberg FDR correction within each contrast;
+If the local filename differs, update rds_path in the script.
 
-create normalised-expression and inferential figures;
+Run:
 
-save two compact result tables and full session information.
+source("scripts/02_final_generate_scRNA_figures.R")
 
-Main output figures
+Outputs are written to:
 
-Figure 1 shows PDE1 normalised expression over time with biological sample points, mean ± SE and FDR-supported matched-time contrasts.
+results/figures/
+results/tables/
 
-Figure 2 shows normalised expression trajectories for PDE1, PR1 and the additional candidate genes.
+Generated tables can include:
 
-Figure 3 shows formal DESeq2 log2 fold-change estimates versus matched-time mock, with 95% Wald confidence intervals and FDR status.
+Nobori_condition_time_celltype_detection.csv
+Nobori_candidate_cluster_statistics.csv
+Nobori_sample_level_detection.csv
+Nobori_condition_time_celltype_mean.csv
+Nobori_subcluster_*.csv
 
-Figure 4 summarises DESeq2 log2 fold changes as a heatmap; an asterisk marks adjusted P < 0.05.
+Flower integration files
 
-Figure 5 ranks the maximum positive DESeq2 effect estimate observed for each candidate. The ranking itself is descriptive; the selected contrast retains its DESeq2 confidence interval and FDR value.
+The developmental/spatial workflow requires Flower integration outputs. Generate these first if they are not already available:
 
-Main tables
+Flower_spatial_predictions_with_coordinates.csv
+Flower_snRNA_PDE1_PR1_by_celltype.csv
 
-Only two analysis tables are intended for version control:
+Keep these files in the directory searched by the Flower input section of the developmental/spatial script. If they are stored elsewhere, change that input path.
 
-bulk_DESeq2_all_candidate_contrasts.csv
+Script 03
 
-Contains all candidate-gene treatment-vs-matched-time-mock results, including log2FC, fold change, confidence intervals, raw P values and adjusted P values.
+scripts/03_final_generate_developmental_spatial_figures.R
 
-bulk_DESeq2_candidate_peak_summary.csv
+Place the required developmental Seurat objects, Curio spatial object and supporting downloaded files under data/raw/.
 
-Contains the maximum estimated positive DESeq2 response for each candidate together with the stimulus, time, fold change, confidence interval and statistical support for that selected contrast.
+Supporting supplementary files should be kept in the subdirectory expected by the script, for example:
 
-Citation
+data/raw/published_supplementary_tables/
 
-If this workflow or repository is reused, please cite the original dataset:
+Run:
 
-Bjornson M, Pimprikar P, Nürnberger T, Zipfel C. 2021. The transcriptional landscape of Arabidopsis thaliana pattern-triggered immunity. Nature Plants. 7:579–586. https://doi.org/10.1038/s41477-021-00874-5
+source("scripts/03_final_generate_developmental_spatial_figures.R")
+
+Outputs are written to:
+
+results/figures/
+results/tables/
+
+Generated tables can include:
+
+Lee_stage_detection_summary.csv
+Lee_celltype_detection_summary.csv
+Lee_PDE1_celltype_enrichment.csv
+Lee_655_subcluster_pseudobulk.csv
+Lee_global_PDE1_PR1_detection.csv
+Lee_Curio_cluster_summary.csv
+Lee_Curio_published_signature_summary.csv
+Lee_Flower_snRNA_PDE1_celltype_summary.csv
+Lee_Flower_PDE1_label_transfer_summary.csv
+
+Script 04
+
+scripts/04_generate_compact_supplementary_tables.R
+
+Run Scripts 01-03 first. The main inputs expected in results/tables/ are:
+
+bulk_DESeq2_candidate_results.csv
+Nobori_condition_time_celltype_detection.csv
+Nobori_candidate_cluster_statistics.csv
+Lee_stage_detection_summary.csv
+Lee_Curio_cluster_summary.csv
+Lee_Flower_PDE1_label_transfer_summary.csv
+
+Run:
+
+source("scripts/04_generate_compact_supplementary_tables.R")
+
+Outputs:
+
+Supplementary_Table_S1_Bulk.csv
+Supplementary_Table_S1_Bulk.png
+Supplementary_Table_S2_Nobori_scRNA.csv
+Supplementary_Table_S2_Nobori_scRNA.png
+Supplementary_Table_S3_Lee_Developmental_Spatial.csv
+Supplementary_Table_S3_Lee_Developmental_Spatial.png
+
+Run order
+
+1. Clone the repository.
+2. Download the required input files.
+3. Place inputs in data/raw/ and required subdirectories.
+4. Update BASE_DIR/base_dir in the scripts.
+5. Install missing R packages.
+6. Run Script 01.
+7. Run Script 02.
+8. Run the Flower integration workflow if its required CSV files are absent.
+9. Run Script 03.
+10. Run Script 04.
+11. Check results/figures/ and results/tables/.
+
+Record the local R environment
+
+writeLines(
+  capture.output(sessionInfo()),
+  file.path("results", "sessionInfo_final.txt")
+)
+
+Package versions can be checked with:
+
+packageVersion("DESeq2")
+packageVersion("Seurat")
+packageVersion("ggplot2")
+
+Files to keep local
+
+Example .gitignore:
+
+data/raw/*.rds
+data/raw/*.rds.gz
+data/raw/*.h5
+data/raw/*.h5ad
+data/raw/*.mtx
+data/raw/*.mtx.gz
+*.RData
+.Rhistory
+.RData
+.Rproj.user/
+
+Always run git status before committing files.
+
+Update GitHub
+
+git status
+git add README.md
+git add scripts/
+git add results/tables/
+git commit -m "Update reproducibility files"
+git push origin main
+
+Avoid git add . until large local files have been excluded.
+
+Troubleshooting
+
+File not found: check the repository path, filename, expected directory and the path specified in the script.
+
+Package not found: install the missing package and rerun the script.
+
+Object or column not found: confirm that the correct processed input object is being used.
+
+Flower input missing: run the Flower integration workflow and place its CSV outputs in the directory searched by Script 03.
+
+Supplementary-table input missing: run the preceding script that generates the required CSV before running Script 04.
+
+GitHub rejects a large file: remove it from Git tracking, add its path or extension to .gitignore, and keep it locally.
