@@ -205,3 +205,16 @@ Avoid git add . until large local files have been excluded.
 -Supplementary-table input missing: run the preceding script that generates the required CSV before running Script 04.
 
 -GitHub rejects a large file: remove it from Git tracking, add its path or extension to .gitignore, and keep it locally.
+
+##**References**
+
+1. Bjornson M, Pimprikar P, Nürnberger T, Zipfel C. The transcriptional landscape of *Arabidopsis thaliana* pattern-triggered immunity. Nat Plants. 2021;7(5):579–586. doi:10.1038/s41477-021-00874-5.
+2. Nobori T, Monell A, Lee TA, Sakata Y, Shirahama S, Zhou J, et al. A rare PRIMER cell state in plant immunity. Nature. 2025;638(8049):197–205. doi:10.1038/s41586-024-08383-z.
+3. Lee TA, Illouz-Eliaz N, Nobori T, Xu J, Jow B, Nery JR, et al. A single-cell, spatial transcriptomic atlas of the *Arabidopsis* life cycle. Nat Plants. 2025;11(9):1960–1975. doi:10.1038/s41477-025-02072-z.
+4. R Core Team. R: A language and environment for statistical computing. Vienna: R Foundation for Statistical Computing. Available from: https://www.R-project.org/
+5. Love MI, Huber W, Anders S. Moderated estimation of fold change and dispersion for RNA-seq data with DESeq2. Genome Biol. 2014;15:550. doi:10.1186/s13059-014-0550-8.
+6. Stuart T, Butler A, Hoffman P, Hafemeister C, Papalexi E, Mauck WM III, et al. Comprehensive integration of single-cell data. Cell. 2019;177(7):1888–1902.e21. doi:10.1016/j.cell.2019.05.031.
+7. Hafemeister C, Satija R. Normalization and variance stabilization of single-cell RNA-seq data using regularized negative binomial regression. Genome Biol. 2019;20:296. doi:10.1186/s13059-019-1874-1.
+8. Hao Y, Stuart T, Kowalski MH, Choudhary S, Hoffman P, Hartman A, et al. Dictionary learning for integrative, multimodal and scalable single-cell analysis. Nat Biotechnol. 2024;42:293–304. doi:10.1038/s41587-023-01767-y.
+9. Wickham H. *ggplot2: Elegant graphics for data analysis*. 2nd ed. Cham: Springer; 2016. doi:10.1007/978-3-319-24277-4.
+10. Wickham H, Averick M, Bryan J, Chang W, McGowan LDA, François R, et al. Welcome to the tidyverse. J Open Source Softw. 2019;4(43):1686. doi:10.21105/joss.01686.
