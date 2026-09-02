@@ -3,7 +3,7 @@ Repository usage guide
 This README describes only how to set up, navigate and run this repository.
 
 Folder structure
-
+```text
 PDE1-expression-analysis-in-Arabidopsis/
 ├── data/
 │   ├── raw/          # downloaded input files
@@ -14,7 +14,7 @@ PDE1-expression-analysis-in-Arabidopsis/
 │   └── tables/       # generated tables
 ├── README.md
 └── .gitignore
-
+```
 Large source datasets should remain local and do not need to be uploaded to GitHub.
 
 Clone and configure
@@ -23,9 +23,9 @@ git clone https://github.com/Mrinalini-Gupta/PDE1-expression-analysis-in-Arabido
 cd PDE1-expression-analysis-in-Arabidopsis
 
 Several scripts contain BASE_DIR or base_dir. Change this to the repository location on the new computer:
-
+```text
 BASE_DIR <- "C:/Users/USERNAME/Documents/PDE1-expression-analysis-in-Arabidopsis"
-
+```
 Use forward slashes in R paths.
 
 R packages
@@ -33,36 +33,36 @@ R packages
 Install packages requested by the scripts if they are not already installed. Packages used across the repository include DESeq2, Seurat, SeuratObject, Matrix, tidyverse, ggplot2, dplyr, tidyr, tibble, purrr, readr, stringr, forcats, patchwork, scales, readxl, curl and gridExtra.
 
 Example:
-
+```text
 install.packages(c("Seurat","tidyverse","patchwork","readxl","curl","gridExtra"))
 
 if (!requireNamespace("BiocManager", quietly=TRUE))
   install.packages("BiocManager")
 BiocManager::install("DESeq2")
-
-Script 01
+```
+**Script 01**
 
 scripts/01_bulk_RNAseq_DESeq2_analysis.R
 
 Place in data/raw/:
-
+```text
 PRJEB25079_UncorrectedCounts.csv
 E-MTAB-9694.sdrf.txt
-
+```
 Run:
 
 source("scripts/01_bulk_RNAseq_DESeq2_analysis.R")
 
 Outputs are written to data/processed/, results/figures/, results/tables/ and results/.
 
-Script 02
+**Script 02**
 
 scripts/02_final_generate_scRNA_figures.R
 
 Place in data/raw/:
-
+```text
 GSE226826_combined_filtered.rds
-
+```
 If the local filename differs, update rds_path in the script.
 
 Run:
@@ -72,6 +72,7 @@ source("scripts/02_final_generate_scRNA_figures.R")
 Outputs are written to:
 
 results/figures/
+
 results/tables/
 
 Generated tables can include:
@@ -142,13 +143,14 @@ source("scripts/04_generate_compact_supplementary_tables.R")
 Outputs:
 
 Supplementary_Table_S1_Bulk.csv
+
 Supplementary_Table_S1_Bulk.png
 Supplementary_Table_S2_Nobori_scRNA.csv
 Supplementary_Table_S2_Nobori_scRNA.png
 Supplementary_Table_S3_Lee_Developmental_Spatial.csv
 Supplementary_Table_S3_Lee_Developmental_Spatial.png
 
-Run order
+**Run order**
 
 1. Clone the repository.
 2. Download the required input files.
@@ -203,7 +205,7 @@ git push origin main
 
 Avoid git add . until large local files have been excluded.
 
-Troubleshooting
+**Troubleshooting**
 
 File not found: check the repository path, filename, expected directory and the path specified in the script.
 
