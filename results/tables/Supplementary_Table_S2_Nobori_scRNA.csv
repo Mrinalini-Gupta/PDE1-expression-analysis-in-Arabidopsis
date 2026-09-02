@@ -1,0 +1,84 @@
+Section,Gene,Context,N cells,Positive cells,% detected,Statistical / descriptive result
+Broad cell type,PDE1,AvrRpm1 | 04h | Epidermis,950,62,6.53,Descriptive
+Broad cell type,PDE1,AvrRpm1 | 04h | Mesophyll,4145,209,5.04,Descriptive
+Broad cell type,PDE1,AvrRpm1 | 06h | Epidermis,232,15,6.47,Descriptive
+Broad cell type,PDE1,AvrRpm1 | 06h | Mesophyll,1150,86,7.48,Descriptive
+Broad cell type,PDE1,AvrRpm1 | 09h | Epidermis,648,39,6.02,Descriptive
+Broad cell type,PDE1,AvrRpm1 | 09h | Mesophyll,2692,147,5.46,Descriptive
+Broad cell type,PDE1,AvrRpm1 | 24h | Epidermis,353,17,4.82,Descriptive
+Broad cell type,PDE1,AvrRpm1 | 24h | Mesophyll,3901,189,4.84,Descriptive
+Broad cell type,PDE1,AvrRpt2 | 04h | Epidermis,645,15,2.33,Descriptive
+Broad cell type,PDE1,AvrRpt2 | 04h | Mesophyll,2365,52,2.20,Descriptive
+Broad cell type,PDE1,AvrRpt2 | 06h | Epidermis,201,5,2.49,Descriptive
+Broad cell type,PDE1,AvrRpt2 | 06h | Vasculature,245,9,3.67,Descriptive
+Broad cell type,PDE1,AvrRpt2 | 09h | Mesophyll,9520,474,4.98,Descriptive
+Broad cell type,PDE1,AvrRpt2 | 09h | Unknown,334,16,4.79,Descriptive
+Broad cell type,PDE1,AvrRpt2 | 24h | Mesophyll,838,36,4.30,Descriptive
+Broad cell type,PDE1,AvrRpt2 | 24h | Unknown,21,2,9.52,Descriptive
+Broad cell type,PDE1,DC3000 | 04h | Epidermis,455,15,3.30,Descriptive
+Broad cell type,PDE1,DC3000 | 04h | Vasculature,552,11,1.99,Descriptive
+Broad cell type,PDE1,DC3000 | 06h | Unknown,60,1,1.67,Descriptive
+Broad cell type,PDE1,DC3000 | 06h | Vasculature,630,10,1.59,Descriptive
+Broad cell type,PDE1,DC3000 | 09h | Epidermis,674,6,0.89,Descriptive
+Broad cell type,PDE1,DC3000 | 09h | Vasculature,596,6,1.01,Descriptive
+Broad cell type,PDE1,DC3000 | 24h | Epidermis,209,4,1.91,Descriptive
+Broad cell type,PDE1,DC3000 | 24h | Mesophyll,1758,33,1.88,Descriptive
+Broad cell type,PDE1,Mock | Mock | Epidermis,2862,61,2.13,Descriptive
+Broad cell type,PDE1,Mock | Mock | Vasculature,2818,40,1.42,Descriptive
+Major cluster,PDE1,Cluster 0 | Epidermis,,,2.61,Fisher FDR = 0.034
+Major cluster,PDE1,Cluster 1 | Mesophyll,,,2.26,Fisher FDR =  1.1e-04
+Major cluster,PDE1,Cluster 10 | Vasculature,,,2.10,Fisher FDR = 0.009
+Major cluster,PDE1,Cluster 12 | Epidermis,,,6.52,Fisher FDR =  1.3e-11
+Major cluster,PDE1,Cluster 2 | Mesophyll,,,1.83,Fisher FDR =  1.2e-08
+Major cluster,PDE1,Cluster 3 | Mesophyll,,,6.17,Fisher FDR =  5.4e-30
+Major cluster,PDE1,Cluster 4 | Mesophyll,,,3.96,Fisher FDR = 0.007
+Major cluster,PDE1,Cluster 5 | Mesophyll,,,1.99,Fisher FDR =  6.2e-06
+Major cluster,PDE1,Cluster 6 | Vasculature,,,2.30,Fisher FDR = 0.009
+Major cluster,PDE1,Cluster 7 | Mesophyll,,,6.79,Fisher FDR =  5.5e-25
+Major cluster,PDE1,Cluster 8 | Mesophyll,,,1.64,Fisher FDR =  9.0e-07
+Major cluster,PDE1,Cluster 9 | Vasculature,,,2.25,Fisher FDR = 0.032
+Broad cell type,PR1,AvrRpm1 | 04h | Mesophyll,4145,5,0.12,Descriptive
+Broad cell type,PR1,AvrRpm1 | 04h | Vasculature,630,1,0.16,Descriptive
+Broad cell type,PR1,AvrRpm1 | 06h | Epidermis,232,1,0.43,Descriptive
+Broad cell type,PR1,AvrRpm1 | 06h | Mesophyll,1150,4,0.35,Descriptive
+Broad cell type,PR1,AvrRpm1 | 09h | Mesophyll,2692,38,1.41,Descriptive
+Broad cell type,PR1,AvrRpm1 | 09h | Unknown,105,3,2.86,Descriptive
+Broad cell type,PR1,AvrRpm1 | 24h | Unknown,37,9,24.32,Descriptive
+Broad cell type,PR1,AvrRpm1 | 24h | Vasculature,623,129,20.71,Descriptive
+Broad cell type,PR1,AvrRpt2 | 04h | Mesophyll,2365,2,0.08,Descriptive
+Broad cell type,PR1,AvrRpt2 | 06h | Vasculature,245,1,0.41,Descriptive
+Broad cell type,PR1,AvrRpt2 | 09h | Mesophyll,9520,1762,18.51,Descriptive
+Broad cell type,PR1,AvrRpt2 | 09h | Unknown,334,60,17.96,Descriptive
+Broad cell type,PR1,AvrRpt2 | 24h | Mesophyll,838,367,43.79,Descriptive
+Broad cell type,PR1,AvrRpt2 | 24h | Unknown,21,10,47.62,Descriptive
+Broad cell type,PR1,DC3000 | 04h | Mesophyll,1915,1,0.05,Descriptive
+Broad cell type,PR1,DC3000 | 06h | Mesophyll,2318,1,0.04,Descriptive
+Broad cell type,PR1,DC3000 | 09h | Mesophyll,2081,12,0.58,Descriptive
+Broad cell type,PR1,DC3000 | 09h | Vasculature,596,3,0.50,Descriptive
+Broad cell type,PR1,DC3000 | 24h | Mesophyll,1758,7,0.40,Descriptive
+Broad cell type,PR1,DC3000 | 24h | Vasculature,326,1,0.31,Descriptive
+Broad cell type,PR1,Mock | Mock | Mesophyll,10029,162,1.62,Descriptive
+Broad cell type,PR1,Mock | Mock | Unknown,342,9,2.63,Descriptive
+Major cluster,PR1,Cluster 0 | Epidermis,,,3.36,Fisher FDR =  5.5e-25
+Major cluster,PR1,Cluster 1 | Mesophyll,,,2.66,Fisher FDR =  7.0e-38
+Major cluster,PR1,Cluster 10 | Vasculature,,,3.42,Fisher FDR =  9.7e-09
+Major cluster,PR1,Cluster 11 | Mesophyll,,,4.03,Fisher FDR =  4.4e-05
+Major cluster,PR1,Cluster 12 | Epidermis,,,4.50,Fisher FDR = 0.012
+Major cluster,PR1,Cluster 13 | Mesophyll,,,2.14,Fisher FDR =  4.6e-12
+Major cluster,PR1,Cluster 17 | Mesophyll,,,3.92,Fisher FDR = 0.004
+Major cluster,PR1,Cluster 18 | Mesophyll,,,13.69,Fisher FDR =  2.4e-15
+Major cluster,PR1,Cluster 19 | Epidermis,,,2.57,Fisher FDR =  8.6e-06
+Major cluster,PR1,Cluster 2 | Mesophyll,,,2.60,Fisher FDR =  3.4e-34
+Major cluster,PR1,Cluster 20 | Mesophyll,,,1.71,Fisher FDR =  1.1e-08
+Major cluster,PR1,Cluster 21 | Epidermis,,,2.93,Fisher FDR =  2.8e-04
+Major cluster,PR1,Cluster 23 | Mesophyll,,,23.21,Fisher FDR =  3.6e-48
+Major cluster,PR1,Cluster 24 | Mesophyll,,,19.97,Fisher FDR =  3.6e-30
+Major cluster,PR1,Cluster 25 | Mesophyll,,,0.19,Fisher FDR =  2.2e-12
+Major cluster,PR1,Cluster 27 | Mesophyll,,,1.44,Fisher FDR = 0.011
+Major cluster,PR1,Cluster 28 | Mesophyll,,,0.00,Fisher FDR =  1.9e-04
+Major cluster,PR1,Cluster 29 | Epidermis,,,12.71,Fisher FDR = 0.032
+Major cluster,PR1,Cluster 3 | Mesophyll,,,10.43,Fisher FDR =  4.1e-33
+Major cluster,PR1,Cluster 4 | Mesophyll,,,7.85,Fisher FDR =  1.2e-05
+Major cluster,PR1,Cluster 5 | Mesophyll,,,7.55,Fisher FDR =  7.2e-04
+Major cluster,PR1,Cluster 7 | Mesophyll,,,16.91,Fisher FDR = 1.2e-104
+Major cluster,PR1,Cluster 9 | Vasculature,,,4.63,Fisher FDR = 0.004

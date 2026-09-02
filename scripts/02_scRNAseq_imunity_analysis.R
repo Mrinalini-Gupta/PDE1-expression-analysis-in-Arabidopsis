@@ -66,7 +66,9 @@ rds_path <- file.path(raw_dir, "GSE226826_combined_filtered.rds")
 # Single output directory for ALL figures
 out_dir <- file.path(base_dir, "results", "figures")
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
-
+# Output directory for quantitative result tables
+table_dir <- file.path(base_dir, "results", "tables")
+dir.create(table_dir, recursive = TRUE, showWarnings = FALSE)
 # Use same output directory for every figure category
 out_fig2       <- out_dir
 out_15panel    <- out_dir
@@ -346,6 +348,94 @@ make_whole_umap_15panel(
   out_file = file.path(out_15panel, "Fig7_PR1_detected_cells_15panel.png")
 )
 # ============================================================
+# 7B. Quantitative PDE1/PR1 detection summary
+#     condition × time × broad cell type
+# ============================================================
+
+genes_detection <- tibble(
+  gene_id = c("AT1G17330", "PR1"),
+  gene_label = c("PDE1", "PR1")
+)
+
+meta_quant <- obj@meta.data %>%
+  as.data.frame() %>%
+  rownames_to_column("cell") %>%
+  filter(
+    !is.na(condition),
+    !is.na(time_plot),
+    celltype %in% c(
+      "Epidermis",
+      "Mesophyll",
+      "Vasculature",
+      "Unknown"
+    )
+  )
+
+detection_list <- list()
+
+for (i in seq_len(nrow(genes_detection))) {
+  
+  gene_id <- genes_detection$gene_id[i]
+  gene_label <- genes_detection$gene_label[i]
+  
+  expr_vec <- get_expr_vec(
+    obj,
+    gene_id,
+    assay_name = "SCT"
+  )
+  
+  tmp <- meta_quant %>%
+    mutate(
+      gene = gene_label,
+      gene_id = gene_id,
+      expression = expr_vec[cell],
+      detected = expression > 0
+    ) %>%
+    group_by(
+      gene,
+      gene_id,
+      condition,
+      time_plot,
+      celltype
+    ) %>%
+    summarise(
+      n_total = n(),
+      n_positive = sum(detected, na.rm = TRUE),
+      percent_detected = 100 * mean(detected, na.rm = TRUE),
+      mean_expression_all_cells = mean(expression, na.rm = TRUE),
+      mean_expression_positive_cells =
+        ifelse(
+          sum(detected, na.rm = TRUE) > 0,
+          mean(expression[detected], na.rm = TRUE),
+          NA_real_
+        ),
+      .groups = "drop"
+    )
+  
+  detection_list[[gene_label]] <- tmp
+}
+
+nobori_detection_summary <- bind_rows(detection_list) %>%
+  arrange(
+    gene,
+    condition,
+    time_plot,
+    celltype
+  )
+
+write.csv(
+  nobori_detection_summary,
+  file.path(
+    table_dir,
+    "Nobori_condition_time_celltype_detection.csv"
+  ),
+  row.names = FALSE
+)
+
+message(
+  "Saved: Nobori_condition_time_celltype_detection.csv"
+)
+# ============================================================
 # 8. Fig. 8: Candidate gene dotplot across major clusters
 # with exploratory Fisher exact test significance
 # ============================================================
@@ -486,7 +576,66 @@ cluster_levels <- sort(unique(dot_data$id_num))
 
 dot_data$id_factor <- factor(dot_data$id_num, levels = cluster_levels)
 dominant_celltype$id_factor <- factor(dominant_celltype$id_num, levels = cluster_levels)
+# ============================================================
+# Save complete candidate-gene cluster statistics
+# ============================================================
 
+cluster_table <- dot_data %>%
+  mutate(
+    cluster = as.character(id),
+    cluster_num = id_num
+  ) %>%
+  select(
+    gene_label,
+    cluster,
+    cluster_num,
+    pct.exp,
+    avg.exp,
+    avg.exp.scaled,
+    p_adj,
+    significance
+  ) %>%
+  left_join(
+    stats_df %>%
+      transmute(
+        gene_label = as.character(gene_label),
+        cluster = as.character(id),
+        p_value
+      ),
+    by = c("gene_label", "cluster")
+  ) %>%
+  left_join(
+    dominant_celltype %>%
+      transmute(
+        cluster = as.character(id),
+        dominant_celltype = celltype,
+        dominant_celltype_n = n
+      ),
+    by = "cluster"
+  ) %>%
+  rename(
+    percent_expressing = pct.exp,
+    average_expression = avg.exp,
+    average_expression_scaled = avg.exp.scaled,
+    FDR = p_adj
+  ) %>%
+  arrange(
+    gene_label,
+    cluster_num
+  )
+
+write.csv(
+  cluster_table,
+  file.path(
+    table_dir,
+    "Nobori_candidate_cluster_statistics.csv"
+  ),
+  row.names = FALSE
+)
+
+message(
+  "Saved: Nobori_candidate_cluster_statistics.csv"
+)
 # -----------------------------
 # Left cell-type strip
 # -----------------------------
@@ -592,14 +741,31 @@ make_sample_level_trend <- function(seu) {
     
     all_gene_df[[gene_label]] <- gene_df
   }
+  # Complete sample-level quantitative results
+  sample_level_df <- bind_rows(all_gene_df)
   
+  write.csv(
+    sample_level_df,
+    file.path(
+      table_dir,
+      "Nobori_sample_level_detection.csv"
+    ),
+    row.names = FALSE
+  )
   trend_df <- bind_rows(all_gene_df) %>%
     group_by(gene, condition, time_plot, celltype) %>%
     summarise(
       mean_percent_positive = mean(percent_positive, na.rm = TRUE),
       .groups = "drop"
     )
-  
+  write.csv(
+    trend_df,
+    file.path(
+      table_dir,
+      "Nobori_condition_time_celltype_mean.csv"
+    ),
+    row.names = FALSE
+  )
   trend_df$time_plot <- factor(trend_df$time_plot, levels = c("04h", "06h", "09h", "24h"))
   trend_df$condition <- factor(trend_df$condition, levels = c("DC3000", "AvrRpm1", "AvrRpt2"))
   trend_df$celltype <- factor(trend_df$celltype, levels = c("Epidermis", "Mesophyll", "Vasculature", "Unknown"))
@@ -871,6 +1037,72 @@ make_subcluster_binary_panel <- function(ct_obj, celltype_name, gene_id, gene_la
       group_id = ifelse(condition == "Mock", "Mock", paste(condition, time_plot, sep = "_"))
     ) %>%
     filter(!is.na(condition), !is.na(time_plot))
+  # ------------------------------------------------------------
+  # Quantitative subcluster detection table
+  # Uses full data BEFORE plotting downsampling
+  # ------------------------------------------------------------
+  
+  subcluster_summary <- plot_df %>%
+    group_by(
+      seurat_clusters,
+      condition,
+      time_plot
+    ) %>%
+    summarise(
+      n_total = n(),
+      n_positive = sum(detected, na.rm = TRUE),
+      percent_detected = 100 * mean(detected, na.rm = TRUE),
+      mean_expression = mean(expr, na.rm = TRUE),
+      .groups = "drop"
+    ) %>%
+    mutate(
+      broad_celltype = celltype_name,
+      gene = gene_label,
+      gene_id = gene_id
+    ) %>%
+    select(
+      gene,
+      gene_id,
+      broad_celltype,
+      seurat_clusters,
+      condition,
+      time_plot,
+      n_total,
+      n_positive,
+      percent_detected,
+      mean_expression
+    )
+  
+  # Make safe filename
+  safe_gene <- gsub(
+    "[^A-Za-z0-9_]",
+    "_",
+    gene_label
+  )
+  
+  safe_celltype <- gsub(
+    "[^A-Za-z0-9_]",
+    "_",
+    celltype_name
+  )
+  
+  
+  # Save CSV
+  write.csv(
+    subcluster_summary,
+    file.path(
+      table_dir,
+      paste0(
+        "Nobori_subcluster_",
+        safe_celltype,
+        "_",
+        safe_gene,
+        ".csv"
+      )
+    ),
+    row.names = FALSE
+  )
+  
   
   # Downsample all condition-time groups to the smallest group size
   group_counts <- plot_df %>%

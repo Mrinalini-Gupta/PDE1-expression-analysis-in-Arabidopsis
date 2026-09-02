@@ -1,0 +1,51 @@
+Section,Context,Gene,N total,N positive,% detected,Enrichment / score
+Development,Seed 0 d,PDE1,13149,361,2.75,
+Development,Seed 1.25 d,PDE1,87207,1191,1.37,
+Development,Seedling 3 d,PDE1,14609,209,1.43,
+Development,Seedling 6 d,PDE1,41314,1636,3.96,
+Development,Seedling 12 d,PDE1,115967,3433,2.96,
+Development,Rosette 21 d,PDE1,22025,621,2.82,
+Development,Rosette 30 d,PDE1,37817,1152,3.05,
+Development,Stem,PDE1,17114,209,1.22,
+Development,Flower,PDE1,11888,128,1.08,
+Development,Silique,PDE1,71829,2366,3.29,
+Development,Seed 0 d,PR1,13149,0,0.00,
+Development,Seed 1.25 d,PR1,87207,0,0.00,
+Development,Seedling 3 d,PR1,14609,0,0.00,
+Development,Seedling 6 d,PR1,41314,0,0.00,
+Development,Seedling 12 d,PR1,115967,0,0.00,
+Development,Rosette 21 d,PR1,22025,0,0.00,
+Development,Rosette 30 d,PR1,37817,17,0.04,
+Development,Stem,PR1,17114,21,0.12,
+Development,Flower,PR1,11888,0,0.00,
+Development,Silique,PR1,71829,0,0.00,
+Curio spatial,Cluster 0,PDE1,32157,36,0.112,log2 enrichment -0.21
+Curio spatial,Cluster 1,PDE1,3073,5,0.163,log2 enrichment 0.18
+Curio spatial,Cluster 10,PDE1,596,1,0.168,log2 enrichment 0.22
+Curio spatial,Cluster 12,PDE1,489,1,0.204,log2 enrichment 0.44
+Curio spatial,Cluster 16,PDE1,324,1,0.309,log2 enrichment 0.94
+Curio spatial,Cluster 17,PDE1,321,2,0.623,log2 enrichment 1.84
+Curio spatial,Cluster 18,PDE1,286,1,0.350,log2 enrichment 1.09
+Curio spatial,Cluster 2,PDE1,2523,11,0.436,log2 enrichment 1.37
+Curio spatial,Cluster 22,PDE1,275,1,0.364,log2 enrichment 1.14
+Curio spatial,Cluster 28,PDE1,231,1,0.433,log2 enrichment 1.37
+Curio spatial,Cluster 3,PDE1,2373,9,0.379,log2 enrichment 1.20
+Curio spatial,Cluster 4,PDE1,1839,2,0.109,log2 enrichment -0.24
+Curio spatial,Cluster 5,PDE1,1429,3,0.210,log2 enrichment 0.47
+Curio spatial,Cluster 7,PDE1,1193,1,0.084,log2 enrichment -0.49
+Curio spatial,Cluster 8,PDE1,926,1,0.108,log2 enrichment -0.25
+Flower spatial inference,region1 | Anther,PDE1-associated state,212,55,25.94,Mean transfer score 0.44
+Flower spatial inference,region1 | Tapetum,PDE1-associated state,45,24,53.33,Mean transfer score 0.56
+Flower spatial inference,region1 | Gynoecium and developing ovule,PDE1-associated state,31,21,67.74,Mean transfer score 0.62
+Flower spatial inference,region1 | Epidermal,PDE1-associated state,29,14,48.28,Mean transfer score 0.51
+Flower spatial inference,region1 | Male meiocyte,PDE1-associated state,48,13,27.08,Mean transfer score 0.44
+Flower spatial inference,region2 | Anther,PDE1-associated state,189,49,25.93,Mean transfer score 0.43
+Flower spatial inference,region2 | Tapetum,PDE1-associated state,43,22,51.16,Mean transfer score 0.55
+Flower spatial inference,region2 | Gynoecium and developing ovule,PDE1-associated state,17,11,64.71,Mean transfer score 0.61
+Flower spatial inference,region2 | Epidermal,PDE1-associated state,40,10,25.00,Mean transfer score 0.44
+Flower spatial inference,region2 | Male meiocyte,PDE1-associated state,32,3,9.38,Mean transfer score 0.37
+Flower spatial inference,region2_long | Anther,PDE1-associated state,421,81,19.24,Mean transfer score 0.41
+Flower spatial inference,region2_long | Tapetum,PDE1-associated state,144,73,50.69,Mean transfer score 0.56
+Flower spatial inference,region2_long | Epidermal,PDE1-associated state,48,25,52.08,Mean transfer score 0.53
+Flower spatial inference,region2_long | Male meiocyte,PDE1-associated state,131,24,18.32,Mean transfer score 0.41
+Flower spatial inference,region2_long | Gynoecium and developing ovule,PDE1-associated state,20,2,10.00,Mean transfer score 0.35

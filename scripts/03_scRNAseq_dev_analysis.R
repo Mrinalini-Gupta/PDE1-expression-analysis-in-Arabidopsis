@@ -74,9 +74,11 @@ BASE_DIR <- "C:/Users/qo25519/Documents/PDE1_bulkRNA_analysis/PDE_candidate_bulk
 
 RAW_DIR <- file.path(BASE_DIR, "data", "raw")
 FIG_DIR <- file.path(BASE_DIR, "results", "figures")
+TABLE_DIR <- file.path(BASE_DIR, "results", "tables")
 SUPP_DIR <- file.path(RAW_DIR, "published_supplementary_tables")
 
 dir.create(FIG_DIR, recursive = TRUE, showWarnings = FALSE)
+dir.create(TABLE_DIR, recursive = TRUE, showWarnings = FALSE)
 dir.create(SUPP_DIR, recursive = TRUE, showWarnings = FALSE)
 
 if (!dir.exists(RAW_DIR)) {
@@ -524,6 +526,37 @@ for (i in seq_len(nrow(atlas))) {
   d$PDE1_det  <- if (pde$present) align_logical(pde$detected, d$cell) else FALSE
   d$PR1_det   <- if (pr1$present) align_logical(pr1$detected, d$cell) else FALSE
   
+  
+  stage_summary_list[[stage]] <- tibble(
+    stage = stage,
+    n_nuclei = nrow(d),
+    
+    PDE1_positive_n = sum(d$PDE1_det, na.rm = TRUE),
+    PDE1_pct_detected = mean(d$PDE1_det, na.rm = TRUE) * 100,
+    PDE1_mean_expression = mean(d$PDE1_expr, na.rm = TRUE),
+    
+    PR1_positive_n = sum(d$PR1_det, na.rm = TRUE),
+    PR1_pct_detected = mean(d$PR1_det, na.rm = TRUE) * 100,
+    PR1_mean_expression = mean(d$PR1_expr, na.rm = TRUE)
+  )
+  
+  group_summary_list[[stage]] <- d %>%
+    group_by(annotation) %>%
+    summarise(
+      n = n(),
+      
+      PDE1_positive_n = sum(PDE1_det, na.rm = TRUE),
+      PDE1_pct = mean(PDE1_det, na.rm = TRUE) * 100,
+      PDE1_mean = mean(PDE1_expr, na.rm = TRUE),
+      
+      PR1_positive_n = sum(PR1_det, na.rm = TRUE),
+      PR1_pct = mean(PR1_det, na.rm = TRUE) * 100,
+      PR1_mean = mean(PR1_expr, na.rm = TRUE),
+      
+      .groups = "drop"
+    ) %>%
+    mutate(stage = stage) %>%
+    filter(n >= 25)
   pde1_umap_plots[[stage]] <-
     plot_feature_umap(d, "PDE1_expr", "PDE1", PDE1_ID, stage) +
     theme(legend.position = "none")
@@ -531,23 +564,6 @@ for (i in seq_len(nrow(atlas))) {
   pr1_umap_plots[[stage]] <-
     plot_feature_umap(d, "PR1_expr", "PR1", PR1_ID, stage) +
     theme(legend.position = "none")
-  
-  stage_summary_list[[stage]] <- tibble(
-    stage = stage,
-    n_nuclei = nrow(d),
-    pde1_pct_detected = mean(d$PDE1_det, na.rm = TRUE) * 100
-  )
-  
-  group_summary_list[[stage]] <- d %>%
-    group_by(annotation) %>%
-    summarise(
-      n = n(),
-      PDE1_pct = mean(PDE1_det, na.rm = TRUE) * 100,
-      PDE1_mean = mean(PDE1_expr, na.rm = TRUE),
-      .groups = "drop"
-    ) %>%
-    mutate(stage = stage) %>%
-    filter(n >= 25)
   
   rm(dev_obj, d, pde, pr1)
   invisible(gc())
@@ -558,6 +574,46 @@ stage_summary <- bind_rows(stage_summary_list) %>%
 
 group_summary <- bind_rows(group_summary_list) %>%
   mutate(stage = factor(stage, levels = STAGE_LEVELS))
+
+  # =============================================================================
+  # Save developmental cell-type summary
+  # =============================================================================
+  
+  group_summary_export <- group_summary %>%
+    mutate(stage = as.character(stage)) %>%
+    arrange(stage, desc(PDE1_pct))
+  
+  write.csv(
+    group_summary_export,
+    file.path(
+      TABLE_DIR,
+      "Lee_celltype_detection_summary.csv"
+    ),
+    row.names = FALSE
+  )
+  
+  message("Saved: Lee_celltype_detection_summary.csv")
+  
+ 
+
+
+# =============================================================================
+# Save developmental stage summary
+# =============================================================================
+
+stage_summary_export <- stage_summary %>%
+  mutate(stage = as.character(stage))
+
+write.csv(
+  stage_summary_export,
+  file.path(
+    TABLE_DIR,
+    "Lee_stage_detection_summary.csv"
+  ),
+  row.names = FALSE
+)
+
+message("Saved: Lee_stage_detection_summary.csv")
 
 fig_s1 <- wrap_plots(pde1_umap_plots, ncol = 5) +
   plot_annotation(
@@ -598,8 +654,8 @@ message("============================================================")
 stage_baseline <- stage_summary %>%
   transmute(
     stage = factor(as.character(stage), levels = STAGE_LEVELS),
-    stage_PDE1_pct = as.numeric(pde1_pct_detected),
-    stage_PDE1_fraction = as.numeric(pde1_pct_detected) / 100
+    stage_PDE1_pct = as.numeric(PDE1_pct_detected),
+    stage_PDE1_fraction = as.numeric(PDE1_pct_detected) / 100
   )
 
 enrich_dat <- group_summary %>%
@@ -626,6 +682,24 @@ enrich_dat <- group_summary %>%
       (expected_PDE1_positive + 0.5),
     log2_enrichment = log2(enrichment_ratio)
   )
+# =============================================================================
+# Save complete PDE1 developmental cell-type enrichment
+# =============================================================================
+
+enrich_export <- enrich_dat %>%
+  mutate(stage = as.character(stage)) %>%
+  arrange(stage, desc(log2_enrichment))
+
+write.csv(
+  enrich_export,
+  file.path(
+    TABLE_DIR,
+    "Lee_PDE1_celltype_enrichment.csv"
+  ),
+  row.names = FALSE
+)
+
+message("Saved: Lee_PDE1_celltype_enrichment.csv")
 
 annotation_enrichment_stats <- enrich_dat %>%
   group_by(annotation) %>%
@@ -774,6 +848,27 @@ h_s19 <- h_s19 %>%
   ) %>%
   arrange(stage, original_order) %>%
   mutate(subcluster_index = row_number())
+# =============================================================================
+# Save 655-subcluster pseudobulk results
+# =============================================================================
+
+h_s19_export <- h_s19 %>%
+  mutate(
+    stage = as.character(stage),
+    PDE1_log2_CPM_plus1 = log2(PDE1_CPM + 1),
+    PR1_log2_CPM_plus1 = log2(PR1_CPM + 1)
+  )
+
+write.csv(
+  h_s19_export,
+  file.path(
+    TABLE_DIR,
+    "Lee_655_subcluster_pseudobulk.csv"
+  ),
+  row.names = FALSE
+)
+
+message("Saved: Lee_655_subcluster_pseudobulk.csv")
 
 h_long <- h_s19 %>%
   select(subcluster, subcluster_index, stage, PDE1_CPM, PR1_CPM) %>%
@@ -888,6 +983,41 @@ global_emb$state <- factor(
   global_emb$state,
   levels = c("Neither", "PDE1+ only", "PR1+ only", "PDE1+ / PR1+")
 )
+# =============================================================================
+# Save global atlas PDE1 / PR1 detection summary
+# =============================================================================
+
+global_detection_summary <- tibble(
+  dataset = "Lee global developmental atlas",
+  n_total = nrow(global_emb),
+  
+  PDE1_positive_n = sum(global_emb$PDE1_det, na.rm = TRUE),
+  PDE1_pct = 100 * mean(global_emb$PDE1_det, na.rm = TRUE),
+  
+  PR1_positive_n = sum(global_emb$PR1_det, na.rm = TRUE),
+  PR1_pct = 100 * mean(global_emb$PR1_det, na.rm = TRUE),
+  
+  both_positive_n = sum(
+    global_emb$PDE1_det & global_emb$PR1_det,
+    na.rm = TRUE
+  ),
+  
+  both_positive_pct = 100 * mean(
+    global_emb$PDE1_det & global_emb$PR1_det,
+    na.rm = TRUE
+  )
+)
+
+write.csv(
+  global_detection_summary,
+  file.path(
+    TABLE_DIR,
+    "Lee_global_PDE1_PR1_detection.csv"
+  ),
+  row.names = FALSE
+)
+
+message("Saved: Lee_global_PDE1_PR1_detection.csv")
 
 global_background <- global_emb %>% filter(state == "Neither")
 global_positive <- global_emb %>% filter(state != "Neither")
@@ -1143,6 +1273,20 @@ cluster_summary <- cluster_summary %>%
     PDE1_enrichment = (PDE1_pct + 0.05) / (GLOBAL_PDE1_PCT + 0.05),
     log2_PDE1_enrichment = log2(PDE1_enrichment)
   )
+# =============================================================================
+# Save direct Curio spatial cluster results
+# =============================================================================
+
+write.csv(
+  cluster_summary,
+  file.path(
+    TABLE_DIR,
+    "Lee_Curio_cluster_summary.csv"
+  ),
+  row.names = FALSE
+)
+
+message("Saved: Lee_Curio_cluster_summary.csv")
 
 # =============================================================================
 # 9. Map Curio clusters to published Curio signatures, then Fig_SP13
@@ -1321,6 +1465,20 @@ sp13 <- sp13 %>%
     )
   ) %>%
   arrange(desc(PDE1_pct))
+# =============================================================================
+# Save Curio published-signature summary
+# =============================================================================
+
+write.csv(
+  sp13,
+  file.path(
+    TABLE_DIR,
+    "Lee_Curio_published_signature_summary.csv"
+  ),
+  row.names = FALSE
+)
+
+message("Saved: Lee_Curio_published_signature_summary.csv")
 
 fig_sp13 <- sp13 %>%
   mutate(label = factor(label, levels = rev(label))) %>%
@@ -1576,6 +1734,30 @@ message(REF_SUMMARY_FILE)
 
 message("Top PDE1-associated Flower cell states:")
 print(top_pde_types)
+# =============================================================================
+# Save Flower PDE1-associated reference cell states
+# =============================================================================
+
+flower_reference_export <- ref_summary %>%
+  mutate(
+    PDE1_top5_state = annotation %in% top_pde_types
+  ) %>%
+  arrange(
+    desc(PDE1_pct),
+    desc(PDE1_n)
+  )
+
+write.csv(
+  flower_reference_export,
+  file.path(
+    TABLE_DIR,
+    "Lee_Flower_snRNA_PDE1_celltype_summary.csv"
+  ),
+  row.names = FALSE
+)
+
+message("Saved: Lee_Flower_snRNA_PDE1_celltype_summary.csv")
+
 # -------------------------------------------------------------------------
 # Safety checks
 # -------------------------------------------------------------------------
@@ -1626,6 +1808,60 @@ coords_plot <- coords_plot %>%
     is.finite(x),
     is.finite(y)
   )
+# =============================================================================
+# Quantitative Flower label-transfer summary
+# =============================================================================
+
+flower_transfer_summary <- coords_plot %>%
+  mutate(
+    PDE1_associated_state =
+      predicted_flower_celltype %in% top_pde_types,
+    
+    high_confidence =
+      transfer_score >= 0.5,
+    
+    high_conf_PDE1_associated =
+      PDE1_associated_state & high_confidence
+  ) %>%
+  group_by(
+    sample,
+    predicted_flower_celltype
+  ) %>%
+  summarise(
+    n_cells = n(),
+    mean_transfer_score = mean(transfer_score, na.rm = TRUE),
+    median_transfer_score = median(transfer_score, na.rm = TRUE),
+    
+    n_high_confidence =
+      sum(transfer_score >= 0.5, na.rm = TRUE),
+    
+    pct_high_confidence =
+      100 * mean(transfer_score >= 0.5, na.rm = TRUE),
+    
+    PDE1_associated_state =
+      first(PDE1_associated_state),
+    
+    n_high_conf_PDE1_associated =
+      sum(high_conf_PDE1_associated, na.rm = TRUE),
+    
+    .groups = "drop"
+  ) %>%
+  arrange(
+    sample,
+    desc(n_high_conf_PDE1_associated),
+    desc(mean_transfer_score)
+  )
+
+write.csv(
+  flower_transfer_summary,
+  file.path(
+    TABLE_DIR,
+    "Lee_Flower_PDE1_label_transfer_summary.csv"
+  ),
+  row.names = FALSE
+)
+
+message("Saved: Lee_Flower_PDE1_label_transfer_summary.csv")
 
 # -------------------------------------------------------------------------
 # Fixed cell-type colours across all three panels
@@ -1935,6 +2171,21 @@ for (nm in flower_samples) {
 }
 
 message("\nFinal Flower figures completed.")
+message("\n============================================================")
+message("LEE RESULT TABLES SAVED")
+message("============================================================")
+
+message("Table directory: ", TABLE_DIR)
+
+lee_table_files <- list.files(
+  TABLE_DIR,
+  pattern = "^Lee_.*\\.csv$",
+  full.names = FALSE
+)
+
+for (f in lee_table_files) {
+  message("  - ", f)
+}
 # =============================================================================
 # Done
 # =============================================================================
