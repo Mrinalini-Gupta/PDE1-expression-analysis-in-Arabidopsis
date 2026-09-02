@@ -206,7 +206,7 @@ Avoid git add . until large local files have been excluded.
 
 -GitHub rejects a large file: remove it from Git tracking, add its path or extension to .gitignore, and keep it locally.
 
-##**References**
+## **References**
 
 1. Bjornson M, Pimprikar P, Nürnberger T, Zipfel C. The transcriptional landscape of *Arabidopsis thaliana* pattern-triggered immunity. Nat Plants. 2021;7(5):579–586. doi:10.1038/s41477-021-00874-5.
 2. Nobori T, Monell A, Lee TA, Sakata Y, Shirahama S, Zhou J, et al. A rare PRIMER cell state in plant immunity. Nature. 2025;638(8049):197–205. doi:10.1038/s41586-024-08383-z.
